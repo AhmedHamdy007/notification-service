@@ -1,0 +1,6 @@
+module.exports = {
+  BOOKING_CONFIRMED: "booking.confirmed",
+  BOOKING_CANCELLED: "booking.cancelled",
+  BOOKING_COMPLETED: "booking.completed",
+  MESSAGING_MESSAGE_SENT: "messaging.message.sent",
+};
