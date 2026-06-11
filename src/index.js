@@ -66,11 +66,30 @@ async function start() {
   });
 }
 
+let shuttingDown = false;
+
 async function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+
   logger.info("Shutdown signal received", { signal });
+  const forceExitTimer = setTimeout(() => {
+    logger.error("Forcing shutdown after timeout", { signal });
+    process.exit(1);
+  }, 10000);
+  forceExitTimer.unref?.();
+
   server.close(async () => {
-    await disconnectMongo();
-    process.exit(0);
+    try {
+      await disconnectMongo();
+      logger.info("Mongo connection closed");
+      clearTimeout(forceExitTimer);
+      process.exit(0);
+    } catch (error) {
+      logger.error("Error during shutdown", { error: error.message });
+      clearTimeout(forceExitTimer);
+      process.exit(1);
+    }
   });
 }
 

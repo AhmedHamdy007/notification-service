@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ROLES = ["owner", "stylist", "customer"];
+const ROLES = ["owner", "stylist", "customer", "admin"];
 const PRIORITIES = ["low", "normal", "high"];
 
 const actorSchema = new mongoose.Schema(

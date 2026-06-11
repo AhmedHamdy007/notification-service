@@ -1,6 +1,16 @@
 module.exports = {
+  BOOKING_ACCEPTED: "booking.accepted",
+  BOOKING_REJECTED: "booking.rejected",
   BOOKING_CONFIRMED: "booking.confirmed",
   BOOKING_CANCELLED: "booking.cancelled",
+  BOOKING_DISPUTED: "booking.disputed",
   BOOKING_COMPLETED: "booking.completed",
+  BOOKING_DEPOSIT_PAID: "booking.deposit_paid",
+  PAYMENT_CAPTURED: "payment.captured",
+  PAYMENT_FAILED: "payment.failed",
+  PAYMENT_AUTHORIZATION_EXPIRING: "payment.authorization_expiring",
+  DISPUTE_RESOLVED: "booking.dispute_resolved",
+  BOOKING_PAYMENT_FAILED: "booking.payment_failed",
+  STYLIST_BOOKING_CONFIRMED: "booking.stylist_confirmed",
   MESSAGING_MESSAGE_SENT: "messaging.message.sent",
 };

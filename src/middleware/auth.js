@@ -12,9 +12,23 @@ function readRequiredKey(filePath) {
 }
 
 const publicKey = readRequiredKey(config.jwtPublicKeyPath);
+const AUTH_LOOKUP_TIMEOUT_MS = 5000;
+
+async function fetchWithTimeout(url, options = {}) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), AUTH_LOOKUP_TIMEOUT_MS);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
 
 async function fetchCurrentUser(req) {
-  const upstream = await fetch(`${config.authServiceUrl}/users/me`, {
+  const upstream = await fetchWithTimeout(`${config.authServiceUrl}/users/me`, {
     method: "GET",
     headers: {
       authorization: req.headers.authorization || "",
@@ -62,7 +76,11 @@ function authenticateToken(req, res, next) {
       });
     }
 
-    req.user = user;
+    req.user = {
+      ...user,
+      id: user.id || req.auth.sub,
+      role: req.auth.role || null,
+    };
     return next();
   })().catch(() =>
     res.status(503).json({

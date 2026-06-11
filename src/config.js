@@ -38,4 +38,5 @@ module.exports = {
   corsAllowedOrigins: csvEnv("CORS_ALLOWED_ORIGINS"),
   sseHeartbeatMs: intEnv("SSE_HEARTBEAT_MS", "25000"),
   notificationHistoryLimit: intEnv("NOTIFICATION_HISTORY_LIMIT", "30"),
+  internalEventToken: process.env.INTERNAL_EVENT_TOKEN || "",
 };

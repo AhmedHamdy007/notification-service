@@ -9,11 +9,35 @@ const {
   markAllNotificationsRead,
   markNotificationRead,
 } = require("../repositories/notificationRepository");
+const { dispatchEvent } = require("../events/subscriptions");
 
 const router = express.Router();
 
 function currentUserId(req) {
   return req.user?.id || req.auth?.sub;
+}
+
+function requireInternalEventAccess(req, res, next) {
+  if (config.internalEventToken) {
+    const supplied = req.get("x-internal-event-token") || "";
+    if (supplied !== config.internalEventToken) {
+      return res.status(403).json({
+        success: false,
+        error: "Forbidden",
+        request_id: req.id,
+      });
+    }
+  }
+
+  if (config.nodeEnv === "production" && !config.internalEventToken) {
+    return res.status(403).json({
+      success: false,
+      error: "Internal event token is required",
+      request_id: req.id,
+    });
+  }
+
+  return next();
 }
 
 router.get("/health", (req, res) => {
@@ -40,6 +64,28 @@ router.get("/ready", async (req, res) => {
       request_id: req.id,
     });
   }
+});
+
+router.post("/internal/events", requireInternalEventAccess, async (req, res) => {
+  const eventType = req.body?.type || req.body?.eventType;
+  if (!eventType) {
+    return res.status(400).json({
+      success: false,
+      error: "Event type is required",
+      request_id: req.id,
+    });
+  }
+
+  const notification = await dispatchEvent(eventType, req.body?.payload || {}, {
+    hub: req.app.locals.sseHub,
+  });
+
+  return res.status(202).json({
+    success: true,
+    handled: Boolean(notification),
+    data: notification,
+    request_id: req.id,
+  });
 });
 
 router.get("/notifications", authenticateToken, async (req, res) => {
